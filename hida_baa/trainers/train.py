@@ -56,7 +56,7 @@ def _prepare_output_dirs(config: dict[str, Any]) -> dict[str, Path]:
         "loss": checkpoint_dir / "loss_graphs",
         "history": checkpoint_dir / "history",
         "predictions": checkpoint_dir / "predictions",
-        "weights": checkpoint_dir,
+        "weights": checkpoint_dir / "weights",
     }
 
     for path in dirs.values():
@@ -196,7 +196,7 @@ def run_training(config_path: str | Path) -> dict[int, list[float]]:
         backbone.trainable = False
 
         _compile_model(model, warm_up_lr, warm_up_loss, metrics)
-        save_model_summary(model, output_dirs["save"] / f"model_summary_fold{fold_id}_warmup.txt")
+        save_model_summary(model, output_dirs["save"] / f"model_summary_warmup.txt", fold_id)
 
         if fold_id == 0:
             try:
@@ -226,7 +226,8 @@ def run_training(config_path: str | Path) -> dict[int, list[float]]:
             layer.trainable = idx > unfreeze_from
 
         _compile_model(model, lr, fine_tune_loss, metrics, weight_decay=weight_decay)
-        save_model_summary(model, output_dirs["save"] / f"model_summary_fold{fold_id}_finetune.txt")
+    
+        save_model_summary(model, output_dirs["save"] / f"model_summary_finetune.txt", fold_id)
 
         history = model.fit(
             train_dataset,

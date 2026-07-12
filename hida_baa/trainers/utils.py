@@ -106,14 +106,16 @@ def save_result(results: dict[int, list[float]], save_dir: str | Path, output_na
         json.dump(json_ready, file, indent=2)
 
 
-def save_model_summary(model: tf.keras.Model, save_path: str | Path) -> None:
-    save_path = Path(save_path)
-    save_path.parent.mkdir(parents=True, exist_ok=True)
+def save_model_summary(model: tf.keras.Model, save_path: str | Path, fold_id:int=0) -> None:
+    if fold_id ==0:
 
-    lines: list[str] = []
+        save_path = Path(save_path)
+        save_path.parent.mkdir(parents=True, exist_ok=True)
 
-    def append_line(line: str, *args: Any, **kwargs: Any) -> None:
-        lines.append(line)
+        lines: list[str] = []
 
-    model.summary(print_fn=append_line)
-    save_path.write_text("\n".join(lines))
+        def append_line(line: str, *args: Any, **kwargs: Any) -> None:
+            lines.append(line)
+
+        model.summary(print_fn=append_line)
+        save_path.write_text("\n".join(lines))

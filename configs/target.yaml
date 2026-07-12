@@ -14,7 +14,7 @@ data:
   k_fold: 10
 
 training:
-  run_name: receive_from_user
+  run_name: test
   epochs: 100
   warm_up_epochs: 10
   warm_up_learning_rate: 1e-4
