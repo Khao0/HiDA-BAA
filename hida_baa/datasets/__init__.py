@@ -1,5 +1,5 @@
 from .bone_age_dataset import (
-    Gender,
+    Sex,
     data_generator_wrapper,
     debug_data,
     load_data,
@@ -7,7 +7,7 @@ from .bone_age_dataset import (
 )
 
 __all__ = [
-    "Gender",
+    "Sex",
     "data_generator_wrapper",
     "debug_data",
     "load_data",
