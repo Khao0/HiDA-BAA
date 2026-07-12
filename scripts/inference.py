@@ -34,7 +34,7 @@ def main() -> None:
 
     prediction = predict_batch(model, [image_path], [sex_value])[0]
     print(f"{float(prediction):.2f} Month")
-    print(f"= {prediction//12} Year, {prediction%12} Month")
+    print(f"= {prediction//12} Year, {prediction%12:.2f} Month")
 
 
 if __name__ == "__main__":
