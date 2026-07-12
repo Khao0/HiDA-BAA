@@ -1,9 +1,16 @@
 # HiDA-BAA
 HiDA-BAA : Hierarchical Domain Adaptation for Bone Age Assessment.
+---
+This project is a collaboration between several faculties at Khon Kaen University, Thailand, including:
+*   The Faculty of Engineering, Department of Computer Engineering
+*   The Faculty of Science, Department of Statistics
+*   The Faculty of Medicine
+
+You can read more detail in this [paper]().<br>
 
 ---
 
-## 🧠 Overview
+## Overview
 
 **HiDA-BoneAge** is a target-domain adaptation framework for **bone age assessment (BAA)** from hand and wrist X-ray images.
 
@@ -25,16 +32,16 @@ The released **HiDA-SourceModel** is based on **EfficientNetB7** with ImageNet p
 
 ---
 
-## 🎯 Key Contributions
+##  Key Contributions
 
-* 📌 **Hierarchical Training Strategy** for regression-based bone age estimation
-* 🔄 **Explicit Domain Adaptation** to mitigate dataset bias
-* 🧩 Modular framework for plugging in different backbone models
-* 📉 Improved robustness across heterogeneous medical datasets
+*  **Hierarchical Training Strategy** for regression-based bone age estimation
+*  **Explicit Domain Adaptation** to mitigate dataset bias
+*  Modular framework for plugging in different backbone models
+*  Improved robustness across heterogeneous medical datasets
 
 ---
 
-## ⚙️ Pipeline
+##  Pipeline
 
 ```
 Target-domain Raw X-ray Images
@@ -47,20 +54,20 @@ Stage 2: Fine-tune on Target Domain Dataset
         ↑
 HiDA-SourceModel checkpoint
         ↓
-HiDA-TargetModel / HiDA-AdaptedModel
+HiDA-AdaptedModel
         ↓
 Bone Age Prediction
 ```
 
 ---
 
-## ⚠️ Important: Preprocessing Requirement
+## Important: Preprocessing Requirement
 
 This repository **does NOT include preprocessing**.
 
 Before training, you **must preprocess all images** using the dedicated preprocessing pipeline:
 
-👉 **Required Repo:** [Khao0/HandXRay-Preprocessing](https://github.com/Khao0/HandXRay-Preprocessing)
+ **Required Repo:** [Khao0/HandXRay-Preprocessing](https://github.com/Khao0/HandXRay-Preprocessing)
 
 This ensures:
 
@@ -72,14 +79,20 @@ Without preprocessing, model performance will significantly degrade. Images with
 
 ---
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### 1. Clone the repository
 
 ```bash
 git clone https://github.com/your-username/HiDA-BoneAge.git
+
 cd HiDA-BoneAge
-python3 -m pip install -r requirements.txt
+
+python3 -m venv .venv
+
+source .venv/bin/activate # only macOS or linux
+
+pip3 install -r requirements.txt
 ```
 
 ---
@@ -148,7 +161,7 @@ The training pipeline follows the original HiDA adaptation flow:
 Run prediction on one preprocessed image with one explicit `.keras` model:
 
 ```bash
-python3 scripts/inference.py path/to/image.png --model checkpoints/AdaptedModel/run/best_model_fold0.keras --sex M
+python3 scripts/inference.py path/to/image.png --model checkpoints/AdaptedModel/run/weigths/best_model_fold0.keras --sex M
 ```
 
 Inference accepts **one image file per call**. The script prints the predicted bone age only:
@@ -159,7 +172,7 @@ Inference accepts **one image file per call**. The script prints the predicted b
 
 ---
 
-### 6. Test / Re-evaluate
+### 6. Re-evaluate
 
 Evaluate a test folder with `test.csv` metadata:
 
@@ -184,7 +197,7 @@ The script prints JSON metrics only:
 
 ---
 
-## 🧩 Framework Design
+## Framework Design
 
 The framework is designed to be modular:
 
@@ -216,7 +229,7 @@ hida_baa/
 
 ---
 
-## 📊 Task Definition
+## Task Definition
 
 * **Input:** Preprocessed **600x600** hand X-ray image
 * **Output:** Continuous bone age prediction (regression)
@@ -224,7 +237,7 @@ hida_baa/
 
 ---
 
-## 📦 Outputs
+## Outputs
 
 By default, training writes adapted models and analysis artifacts to:
 
@@ -253,54 +266,27 @@ Bone age assessment models often suffer from **performance degradation when appl
 
 HiDA-BoneAge mitigates these issues through **structured training stages**, enabling better generalization and adaptation.
 
----
-
-## 📌 Future Work
-
-* Multi-domain adaptation
-* Semi-supervised / unsupervised domain adaptation
-* Integration with uncertainty estimation
-* Extension to other medical imaging tasks
 
 ---
 
-## 📖 Citation
+## Citation
 
 If you use this work, please cite:
 
 ```bibtex
 @article{hida_boneage,
   title={Hierarchical Domain Adaptation for Bone Age Assessment},
-  author={Your Name},
+  author={Kwankhao Tangprasert},
   year={2026}
 }
 ```
 
 ---
 
-## 🤝 Acknowledgements
+## Acknowledgements
 
-* Public datasets (e.g., RSNA Bone Age)
-* Medical imaging and deep learning communities
+1. [RSNA Pediatric Bone Age Challenge 2017](https://www.rsna.org/artificial-intelligence/ai-image-challenge/rsna-pediatric-bone-age-challenge-2017) <br>
+   → Masks available at: https://www.kaggle.com/datasets/kwankhaotangprasert/rsna-handmask  
 
----
-
-## 📬 Contact
-
-For questions or collaboration, please open an issue or contact the author.
-
----
-
-## 💡 Tip (important for your paper)
-
-In your paper, refer to this repo as:
-
-> *“We release our training framework, **HiDA-BoneAge**, for reproducibility.”*
-
----
-
-If you want next, I can:
-
-* Write a **matching paper title + abstract (very strong for submission)**
-* Design **figure diagram (pipeline for your paper)**
-* Or refine your **method section wording (Hierarchical DA formal)**
+2. [Digital Hand Atlas](https://ipilab.usc.edu/research/baaweb/) <br>
+   → Masks available at: https://www.kaggle.com/datasets/kwankhaotangprasert/dha-handmask  
