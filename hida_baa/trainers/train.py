@@ -62,7 +62,7 @@ def _prepare_output_dirs(config: dict[str, Any]) -> dict[str, Path]:
     for path in dirs.values():
         path.mkdir(parents=True, exist_ok=True)
 
-    return dirs
+    return dirs, run_name
 
 
 def _make_optimizer(learning_rate: float, weight_decay: float | None = None) -> tf.keras.optimizers.Optimizer:
@@ -150,7 +150,7 @@ def run_training(config_path: str | Path) -> dict[int, list[float]]:
     fine_tune_loss = training_config.get("fine_tune_loss", "mean_absolute_error")
     metrics = training_config.get("metrics", ["mae"])
 
-    output_dirs = _prepare_output_dirs(config)
+    output_dirs, run_name = _prepare_output_dirs(config)
     _save_resolved_config(config, output_dirs["save"])
 
     train_data = load_data(config, train=True)
@@ -246,4 +246,23 @@ def run_training(config_path: str | Path) -> dict[int, list[float]]:
         scatter_plot(prediction_df, output_dirs["predictions"], f"predictions_fold{fold_id}")
 
     save_result(cv_results, output_dirs["save"], "cv_results")
+    checkpoint_path = Path(training_config.get("checkpoint_dir", "checkpoints/AdaptedModel")) / run_name
+
+
+    print("\n" + "="*50)
+    print("✅ Training Completed Successfully")
+    print("="*50)
+
+    print(f"📁 Checkpoint saved at:\n   {checkpoint_path}")
+
+    print("\n📊 Cross-validation Results:")
+    print("-"*50)
+
+    # Pretty print dict / list nicely
+    if isinstance(cv_results, (dict, list)):
+        print(json.dumps(cv_results, indent=4))
+    else:
+        print(cv_results)
+
+    print("="*50 + "\n")
     return cv_results

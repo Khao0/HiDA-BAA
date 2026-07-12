@@ -143,6 +143,47 @@ The training pipeline follows the original HiDA adaptation flow:
 
 ---
 
+### 5. Inference
+
+Run prediction on one preprocessed image with one explicit `.keras` model:
+
+```bash
+python3 scripts/inference.py path/to/image.png --model checkpoints/AdaptedModel/run/best_model_fold0.keras --sex M
+```
+
+Inference accepts **one image file per call**. The script prints the predicted bone age only:
+
+```text
+120.123456
+```
+
+---
+
+### 6. Test / Re-evaluate
+
+Evaluate a test folder with `test.csv` metadata:
+
+```bash
+python3 scripts/test.py data/test --csv data/test.csv --model checkpoints/AdaptedModel/run/best_model_fold0.keras
+```
+
+The model path is required and must point to a `.keras` file.
+
+`test.csv` must contain:
+
+```csv
+image_name,bone_age,sex
+example.png,120,M
+```
+
+The script prints JSON metrics only:
+
+```json
+{"mae": 4.1, "n": 100, "r2": 0.91, "rmse": 5.3}
+```
+
+---
+
 ## 🧩 Framework Design
 
 The framework is designed to be modular:
@@ -162,6 +203,7 @@ scripts/
 ├── test.py
 └── inference.py
 hida_baa/
+├── predict.py
 ├── datasets/
 │   └── bone_age_dataset.py
 ├── models/
@@ -189,9 +231,12 @@ By default, training writes adapted models and analysis artifacts to:
 ```
 checkpoints/AdaptedModel/<run_name>/
 outputs/target_model/<run_name>/
-├── Loss_graphs/
+├── loss_graphs/
 ├── history/
 ├── predictions/
+├── weights/
+├── structure.png
+├── model_summary.txt
 ├── config.resolved.json
 └── cv_results.csv
 ```

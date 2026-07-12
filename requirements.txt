@@ -9,3 +9,4 @@ scikit-learn==1.5.2
 matplotlib==3.9.2
 seaborn==0.13.2
 pydot==3.0.3
+scikit-learn==1.5.2
