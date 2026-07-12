@@ -1,0 +1,31 @@
+seed: 42
+
+data:
+  train_path: data/train
+  test_path: data/test
+  train_annotations: data/train.csv
+  test_annotations: data/test.csv
+  image_column: image_name
+  image_extension: .png
+  label_column: bone_age
+  sex_column: sex
+  image_size: [600, 600]
+  batch_size: 32
+  k_fold: 10
+
+training:
+  run_name: receive_from_user
+  epochs: 100
+  warm_up_epochs: 10
+  warm_up_learning_rate: 1e-4
+  learning_rate: 1e-5
+  weight_decay: 1e-4
+  patience: 10
+  warm_up_loss: mean_absolute_error
+  fine_tune_loss: mean_absolute_error
+  loss: mean_absolute_error
+  metrics: [mae]
+  checkpoint_dir: checkpoints/AdaptedModel
+
+fine_tuning:
+  unfreeze_from_layer: 713

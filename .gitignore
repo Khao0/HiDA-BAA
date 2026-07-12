@@ -5,6 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
+src.py
 
 # Distribution / packaging
 .Python
@@ -216,3 +217,28 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# HiDA-BAA local data and training outputs
+.DS_Store
+data/**/images/*
+!data/**/images/
+!data/**/images/.gitkeep
+data/train/*
+!data/train/.gitkeep
+data/test/*
+!data/test/.gitkeep
+checkpoints/*
+!checkpoints/.gitkeep
+!checkpoints/SourceModel/
+!checkpoints/SourceModel/.gitkeep
+!checkpoints/AdaptedModel/
+!checkpoints/AdaptedModel/.gitKeep
+outputs/*
+!outputs/.gitkeep
+logs/*
+!logs/.gitkeep
+
+# Model artifacts
+*.h5
+*.keras
+*.ckpt

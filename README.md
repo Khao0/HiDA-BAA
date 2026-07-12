@@ -5,20 +5,23 @@ HiDA-BAA : Hierarchical Domain Adaptation for Bone Age Assessment.
 
 ## 🧠 Overview
 
-**HiDA-BoneAge** is a training framework for **bone age assessment (BAA)** from hand and wrist X-ray images using a **hierarchical domain adaptation strategy**.
+**HiDA-BoneAge** is a target-domain adaptation framework for **bone age assessment (BAA)** from hand and wrist X-ray images.
 
 The framework addresses the **domain shift problem** commonly observed between:
 
-* Public datasets (e.g., RSNA)
+* Public datasets (e.g., RSNA, DHA)
 * Real-world clinical data (e.g., hospital-specific distributions)
 
-Instead of training a model in a single stage, HiDA-BoneAge introduces a **two-stage hierarchical training paradigm**:
+HiDA-BoneAge uses a **two-stage hierarchical training paradigm**:
 
-1. **Stage 1 — General Representation Learning**
-   Train the model on a large-scale **public dataset** to learn robust and generalizable features.
+| Stage | Name | Purpose |
+| --- | --- | --- |
+| Stage 1 | **HiDA-SourceModel** | A provided base model already trained on public/source datasets such as DHA and RSNA. |
+| Stage 2 | **HiDA-TargetModel** or **HiDA-AdaptedModel** | Fine-tune the source model on the researcher's target-domain dataset. |
 
-2. **Stage 2 — Domain Adaptation**
-   Fine-tune the pretrained model on a **target domain dataset** to adapt to distribution shifts and improve prediction accuracy.
+This repository focuses on **Stage 2 target-domain adaptation**. Researchers only need their own preprocessed target dataset and the provided Stage 1 checkpoint.
+
+The released **HiDA-SourceModel** is based on **EfficientNetB7** with ImageNet pretrained weights, following the Keras EfficientNet fine-tuning setup: [Image classification via fine-tuning with EfficientNet](https://keras.io/examples/vision/image_classification_efficientnet_fine_tuning/). Because the source model was trained at **600x600** resolution, this repository expects **600x600 input images only**.
 
 ---
 
@@ -34,17 +37,19 @@ Instead of training a model in a single stage, HiDA-BoneAge introduces a **two-s
 ## ⚙️ Pipeline
 
 ```
-Raw X-ray Images
+Target-domain Raw X-ray Images
         ↓
-[ Preprocessing Pipeline ]  ← (Required, external repo)
+[ HandXRay-Preprocessing ]  ← Required external repo
         ↓
-Cleaned & Standardized Images
+Preprocessed 600x600 Images
         ↓
-Stage 1: Train on Public Dataset
+Stage 2: Fine-tune on Target Domain Dataset
+        ↑
+HiDA-SourceModel checkpoint
         ↓
-Stage 2: Fine-tune on Target Domain
+HiDA-TargetModel / HiDA-AdaptedModel
         ↓
-Bone Age Prediction (Regression)
+Bone Age Prediction
 ```
 
 ---
@@ -55,16 +60,15 @@ This repository **does NOT include preprocessing**.
 
 Before training, you **must preprocess all images** using the dedicated preprocessing pipeline:
 
-👉 **Required Repo:** *(replace with your actual repo link)*
-**HandXRay-Preprocessing-Pipeline**
+👉 **Required Repo:** [Khao0/HandXRay-Preprocessing](https://github.com/Khao0/HandXRay-Preprocessing)
 
 This ensures:
 
 * Consistent image format
 * Proper hand localization
-* Standardized input for model training
+* Standardized **600x600** input for model training
 
-Without preprocessing, model performance will significantly degrade.
+Without preprocessing, model performance will significantly degrade. Images with a size other than **600x600** are not supported by the target adaptation pipeline.
 
 ---
 
@@ -75,36 +79,67 @@ Without preprocessing, model performance will significantly degrade.
 ```bash
 git clone https://github.com/your-username/HiDA-BoneAge.git
 cd HiDA-BoneAge
+python3 -m pip install -r requirements.txt
 ```
 
 ---
 
-### 2. Prepare Dataset
+### 2. Prepare Target Dataset
 
 * Apply preprocessing using the external repo
 * Organize data into:
 
 ```
 data/
-├── public/        # e.g., RSNA
-├── target/        # your domain-specific dataset
+├── train/                  # preprocessed 600x600 target-domain training images
+├── test/                   # preprocessed 600x600 target-domain test/validation images
+├── train.csv
+└── test.csv
 ```
+
+Expected annotation format:
+
+```csv
+image_name,bone_age,sex
+0001.png,132,M
+0002.png,96,F
+```
+
+See `data/README.md` and the `*.csv.example` files for templates.
 
 ---
 
-### 3. Train Model
+### 3. HiDA-SourceModel Resolution
 
-#### Stage 1 — Train on Public Dataset
+The training system resolves **HiDA-SourceModel** automatically from constants defined in `hida_baa/models/load_source_model.py`:
 
-```bash
-python train_stage1.py --config configs/stage1.yaml
+1. It first checks the default local path:
+
+```
+checkpoints/SourceModel/HiDA-SourceModel.keras
 ```
 
-#### Stage 2 — Domain Adaptation (Fine-tuning)
+2. If the file is not found, it downloads `HiDA-SourceModel.keras` from Hugging Face repo `Kwankhao/HiDA-SourceModel`.
+
+Researchers do not need to pass a source-model path manually.
+
+---
+
+### 4. Train HiDA-TargetModel
 
 ```bash
-python train_stage2.py --config configs/stage2.yaml
+python3 scripts/train.py --config configs/target.yaml
 ```
+
+The training pipeline follows the original HiDA adaptation flow:
+
+* Create stratified K-fold splits from `train.csv` using bone-age year and sex
+* Load a fresh **HiDA-SourceModel** for each fold
+* Warm up the regression head while `efficientnetb7` is frozen
+* Reload the best warm-up model
+* Fine-tune upper EfficientNetB7 layers into **HiDA-TargetModel**
+* Evaluate each fold on `test.csv`
+* Save fold models, histories, loss curves, prediction scatter plots, and CV metrics
 
 ---
 
@@ -112,18 +147,54 @@ python train_stage2.py --config configs/stage2.yaml
 
 The framework is designed to be modular:
 
-* `models/` → backbone architectures (e.g., EfficientNet)
-* `trainers/` → stage-specific training logic
+* `hida_baa/models/` → source model loading and model utilities
+* `hida_baa/trainers/` → target adaptation training logic
 * `configs/` → experiment configurations
-* `datasets/` → dataset loaders (public + target)
+* `hida_baa/datasets/` → target dataset loaders
+
+Current scaffold:
+
+```
+configs/
+└── target.yaml
+scripts/
+├── train.py
+├── test.py
+└── inference.py
+hida_baa/
+├── datasets/
+│   └── bone_age_dataset.py
+├── models/
+│   ├── bone_age_model.py
+│   └── load_source_model.py
+└── trainers/
+    ├── train.py
+    └── utils.py
+```
 
 ---
 
 ## 📊 Task Definition
 
-* **Input:** Preprocessed hand X-ray image
+* **Input:** Preprocessed **600x600** hand X-ray image
 * **Output:** Continuous bone age prediction (regression)
-* **Loss:** Typically Mean Squared Error (MSE)
+* **Default adaptation loss:** Mean Absolute Error (MAE)
+
+---
+
+## 📦 Outputs
+
+By default, training writes adapted models and analysis artifacts to:
+
+```
+checkpoints/AdaptedModel/<run_name>/
+outputs/target_model/<run_name>/
+├── Loss_graphs/
+├── history/
+├── predictions/
+├── config.resolved.json
+└── cv_results.csv
+```
 
 ---
 
