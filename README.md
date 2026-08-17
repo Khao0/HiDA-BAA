@@ -274,10 +274,23 @@ HiDA-BoneAge mitigates these issues through **structured training stages**, enab
 If you use this work, please cite:
 
 ```bibtex
-@article{hida_boneage,
-  title={Hierarchical Domain Adaptation for Bone Age Assessment},
-  author={Kwankhao Tangprasert},
-  year={2026}
+@misc{wiratchotisatian2026beyond,
+  author = {Pitchaya Wiratchotisatian and
+            Khwankaow Tangprasert and
+            Sarun Paisarnsrisomsuk and
+            Panawit Hanpinitsak and
+            Wichuda Chaisiwamongkol and
+            Ratikorn Chaisiwamongkol and
+            Nipaporn Tewattanarat and
+            Chanakarn Poonpol and
+            Chatparin Pansukrada and
+            Wilairat Thaowandee},
+  title = {Beyond Benchmark Accuracy: Hierarchical Transfer Learning
+           and ROI Standardization for Bone Age Assessment in Thai Children},
+  year = {2026},
+  month = aug,
+  note = {Author preprint; manuscript submitted to IEEE for possible publication},
+  url = {https://github.com/Khao0/HiDA-BAA}
 }
 ```
 
